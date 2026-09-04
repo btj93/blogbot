@@ -1,0 +1,12 @@
+{
+  "streaming_url_list": [
+    {"url": "webrtc://example.com/live/main?tabr_control=auto", "quality": 0, "type": "webrtc"},
+    {"url": "webrtc://example.com/live/main_ss", "quality": 1000, "type": "webrtc"},
+    {"url": "webrtc://example.com/live/main_mm", "quality": 200, "type": "webrtc"},
+    {"url": "webrtc://example.com/live/main_ll", "quality": 100, "type": "webrtc"},
+    {"url": "https://example.com/live/main_abr.m3u8", "quality": 0, "type": "hls_all"},
+    {"url": "https://example.com/live/main_ss.m3u8", "quality": 1000, "type": "hls"},
+    {"url": "https://example.com/live/main_mm.m3u8", "quality": 200, "type": "hls"},
+    {"url": "https://example.com/live/main_ll.m3u8", "quality": 100, "type": "hls"}
+  ]
+}

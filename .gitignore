@@ -1,0 +1,22 @@
+# Build output.
+# Anchored to the repository root: an unanchored "blogbot" also matches the
+# cmd/blogbot source directory and silently drops it from the repository.
+/blogbot
+webapp/build/
+
+# Dependencies
+node_modules/
+
+# Local databases
+*.db*
+
+# Local configuration — never commit real credentials.
+# Copy config.example.toml to config.toml and fill it in locally.
+config.toml
+config.local.toml
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.idea/

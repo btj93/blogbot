@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Fork pull requests must never receive repository secrets. The default
+# `pull_request` trigger already withholds them; `pull_request_target` would
+# not, and must not be used here.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: Go server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Verify formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-clean:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: Build
+        run: go build ./...
+
+      # The environment is cleared so an inherited BLOGBOT_* value cannot
+      # override the file or default that a test is asserting.
+      - name: Test
+        run: go test -race ./...
+        env:
+          BLOGBOT_TELEGRAM_BOT_TOKEN: ""
+          BLOGBOT_DATABASE_DSN: ""
+
+      # Deploy cross-compiles for the server's architecture. Proving that here
+      # means a merge cannot fail for the first time during deployment.
+      - name: Confirm the release build cross-compiles
+        run: GOOS=linux GOARCH=arm64 go build -o /dev/null ./cmd/blogbot/
+
+  lint:
+    name: Go lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          # Pinned, not "latest": a newer linter than the one on a workstation
+          # turns a locally clean tree into a red build, and the reverse hides
+          # real findings. Bump this deliberately.
+          version: v2.13.2
+          args: --config .github/.golangci.yml
+
+  webapp:
+    name: Webapp
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webapp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: CI=true bun run test --passWithNoTests
+
+      - name: Build
+        run: bun run build

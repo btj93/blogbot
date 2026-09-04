@@ -1,0 +1,192 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - bidichk
+    - copyloopvar
+    - errcheck
+    - errorlint
+    - exhaustive
+    - exptostd
+    - forbidigo
+    - gocritic
+    - gosec
+    - govet
+    - grouper
+    - iface
+    - inamedparam
+    - ineffassign
+    - intrange
+    - loggercheck
+    - mirror
+    - misspell
+    - modernize
+    - nilerr
+    - nosprintfhostport
+    - prealloc
+    - predeclared
+    - reassign
+    - revive
+    - sloglint
+    - staticcheck
+    - tagalign
+    - testifylint
+    - thelper
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - whitespace
+    - wsl_v5
+    - perfsprint
+    - unconvert
+    - noctx
+  settings:
+    copyloopvar:
+      check-alias: true
+    staticcheck:
+      checks:
+        - all
+        - "-ST1000"
+        - "-ST1003"
+        - "-ST1005"
+        - "-ST1016"
+        - "-ST1020"
+        - "-ST1021"
+        - "-ST1022"
+    errorlint:
+      allowed-errors:
+        - err: io.EOF
+    exhaustive:
+      default-signifies-exhaustive: true
+    forbidigo:
+      forbid:
+        - pattern: os.Getenv
+          msg: Do not use os.Getenv. Use config instead.
+        - pattern: ^\s*fmt.Print
+          msg: Do not use fmt.Print*. Use slog instead.
+        - pattern: ^\s*print
+          msg: Do not use print*. Use slog instead.
+      analyze-types: true
+    grouper:
+      const-require-single-const: true
+      import-require-single-import: true
+      var-require-single-var: true
+    govet:
+      enable:
+        - nilness
+    loggercheck:
+      no-printf-like: true
+    predeclared:
+      qualified-name: true
+    reassign:
+      patterns:
+        - .*
+    sloglint:
+      attr-only: true
+      context: scope
+      key-naming-case: snake
+    tagalign:
+      strict: true
+    testifylint:
+      enable-all: true
+    perfsprint:
+      strconcat: false
+    gosec:
+      excludes:
+        - G115
+        - G602
+        - G704
+    usestdlibvars:
+      http-method: true
+      http-status-code: true
+      time-weekday: true
+      time-month: true
+      time-layout: true
+      crypto-hash: true
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: unexported-return
+          disabled: true
+        - name: add-constant
+          disabled: true
+        - name: line-length-limit
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: unchecked-type-assertion
+          disabled: true
+        - name: argument-limit
+          disabled: true
+        - name: function-result-limit
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: enforce-switch-style
+          disabled: true
+        - name: flag-parameter
+          disabled: true
+        - name: unused-receiver
+          disabled: true
+        - name: struct-tag
+          disabled: true
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      # Third-party Go vendored inside the webapp dependency tree.
+      - webapp/node_modules
+      - third_party$
+      - builtin$
+      - examples$
+    rules:
+      - path: _test\.go
+        linters:
+          - revive
+        text: "^(unused-parameter|add-constant)"
+      - path: _test\.go
+        linters:
+          - gosec
+        text: G101
+      - path: _test\.go
+        linters:
+          - noctx
+formatters:
+  enable:
+    - golines
+    - goimports
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/btj93/blogbot)
+    golines:
+      max-len: 120
+      reformat-tags: false
+      tab-len: 2
+    goimports:
+      local-prefixes:
+        - github.com/btj93/blogbot
+  exclusions:
+    generated: lax
+    paths:
+      # Third-party Go vendored inside the webapp dependency tree.
+      - webapp/node_modules
+      - third_party$
+      - builtin$
+      - examples$

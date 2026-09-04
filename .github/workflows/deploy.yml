@@ -1,0 +1,103 @@
+name: Deploy
+
+# Deploys on every merge to main.
+#
+# Both halves ship together: the webapp is served by the Go binary and both are
+# picked up by one systemd restart. Splitting them across workflows would let a
+# restart land while the other half was still copying — and GitHub's
+# concurrency groups are per-repository, so separate repos could not lock
+# against each other at all.
+#
+# Only the binary and the built webapp are shipped. config.toml lives on the
+# server and is managed out of band, so no application credential is ever
+# stored in GitHub.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Test before deploying
+        run: go test ./...
+        env:
+          BLOGBOT_TELEGRAM_BOT_TOKEN: ""
+          BLOGBOT_DATABASE_DSN: ""
+
+      - name: Build binary (linux/arm64)
+        run: GOOS=linux GOARCH=arm64 go build -o blogbot ./cmd/blogbot/
+
+      - name: Build webapp
+        working-directory: webapp
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      # The host key is pinned from a secret rather than accepted on first use,
+      # so a redirected DNS record cannot silently receive the deploy key.
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          REMOTE: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_DIR: ${{ secrets.DEPLOY_DIR }}
+        run: |
+          SSH="ssh -i $HOME/.ssh/deploy_key $REMOTE"
+
+          echo "Stopping services..."
+          $SSH "sudo systemctl stop blogbot-webhook 2>/dev/null || true
+                sudo systemctl stop blogbot-showroom-live 2>/dev/null || true"
+
+          echo "Uploading..."
+          rsync -az -e "ssh -i $HOME/.ssh/deploy_key" blogbot "$REMOTE:$REMOTE_DIR/"
+          $SSH "mkdir -p $REMOTE_DIR/webapp"
+          rsync -az --delete -e "ssh -i $HOME/.ssh/deploy_key" webapp/build/ "$REMOTE:$REMOTE_DIR/webapp/"
+          $SSH "chcon -t bin_t $REMOTE_DIR/blogbot 2>/dev/null || true
+                sudo setcap cap_net_bind_service=+ep $REMOTE_DIR/blogbot"
+
+          echo "Starting services..."
+          $SSH "sudo systemctl start blogbot-webhook; sudo systemctl start blogbot-showroom-live"
+
+          ok=true
+          for svc in blogbot-webhook blogbot-showroom-live; do
+            active=false
+            for _ in $(seq 1 10); do
+              if $SSH "sudo systemctl is-active $svc --quiet"; then
+                echo "$svc: active"; active=true; break
+              fi
+              sleep 1
+            done
+            $active || { echo "$svc: FAILED to become active"; ok=false; }
+          done
+          $ok
+
+      - name: Remove deploy key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

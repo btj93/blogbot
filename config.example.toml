@@ -1,0 +1,18 @@
+[telegram]
+bot_token = ""
+log_chat_id = ""
+
+[database]
+dsn = "postgres://blogbot:blogbot@localhost:5432/blogbot?sslmode=disable"
+
+[webhook]
+listen_addr = ":443"
+webhook_url = ""
+tls_cert = "/home/opc/blogbot-go/cert.pem"
+tls_key = "/home/opc/blogbot-go/key.pem"
+# use_webapp = true
+# webapp_url = "https://example.com/tg/blogbot/"
+
+[scraper]
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
+staff_names = ["運営スタッフ"]

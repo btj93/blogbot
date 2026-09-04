@@ -1,0 +1,835 @@
+{
+    "乃木坂46": {
+        "伊藤理々杏": {
+            "ID": "70821",
+            "URL": "https://www.showroom-live.com/r/46_itouriria",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "岩本蓮加": {
+            "ID": "70818",
+            "URL": "https://www.showroom-live.com/r/46_iwamotorenka",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "梅澤美波": {
+            "ID": "70822",
+            "URL": "https://www.showroom-live.com/r/46_umezawaminami",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "久保史緒里": {
+            "ID": "70820",
+            "URL": "https://www.showroom-live.com/r/46_kuboshiori",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "吉田綾乃クリスティー": {
+            "ID": "70815",
+            "URL": "https://www.showroom-live.com/r/46_yoshidaayanochristie",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "遠藤さくら": {
+            "ID": "199902",
+            "URL": "https://www.showroom-live.com/r/46_endosakura",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "賀喜遥香": {
+            "ID": "199343",
+            "URL": "https://www.showroom-live.com/r/46_kakiharuka",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "金川紗耶": {
+            "ID": "201106",
+            "URL": "https://www.showroom-live.com/r/46_kanagawasaya",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "柴田柚菜": {
+            "ID": "199333",
+            "URL": "https://www.showroom-live.com/r/46_shibatayuna",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "田村真佑": {
+            "ID": "199316",
+            "URL": "https://www.showroom-live.com/r/46_tamuramayu",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "筒井あやめ": {
+            "ID": "199900",
+            "URL": "https://www.showroom-live.com/r/46_tsutsuiayame",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "矢久保美緒": {
+            "ID": "200838",
+            "URL": "https://www.showroom-live.com/r/46_yakubomio",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "林瑠奈": {
+            "ID": "199328",
+            "URL": "https://www.showroom-live.com/r/46_hayashiruna",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "黒見明香": {
+            "ID": "199329",
+            "URL": "https://www.showroom-live.com/r/46_kuromiharuka",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "松尾美佑": {
+            "ID": "200839",
+            "URL": "https://www.showroom-live.com/r/46_matsuomiyu",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "弓木奈於": {
+            "ID": "199881",
+            "URL": "https://www.showroom-live.com/r/46_yumikinao",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "佐藤璃果": {
+            "ID": "199912",
+            "URL": "https://www.showroom-live.com/r/46_satourika",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "五百城茉央": {
+            "ID": "461073",
+            "URL": "https://www.showroom-live.com/r/46_iokimao",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "池田瑛紗": {
+            "ID": "461074",
+            "URL": "https://www.showroom-live.com/r/46_ikedateresa",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "一ノ瀬美空": {
+            "ID": "461075",
+            "URL": "https://www.showroom-live.com/r/46_ichinosemiku",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "井上和": {
+            "ID": "461076",
+            "URL": "https://www.showroom-live.com/r/46_inouenagi",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "岡本姫奈": {
+            "ID": "461078",
+            "URL": "https://www.showroom-live.com/r/46_okamotohina",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小川彩": {
+            "ID": "461079",
+            "URL": "https://www.showroom-live.com/r/46_ogawaaya",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "奥田いろは": {
+            "ID": "461081",
+            "URL": "https://www.showroom-live.com/r/46_okudairoha",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "川﨑桜": {
+            "ID": "461082",
+            "URL": "https://www.showroom-live.com/r/46_kawasakisakura",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "菅原咲月": {
+            "ID": "461083",
+            "URL": "https://www.showroom-live.com/r/46_sugawarasatsuki",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "冨里奈央": {
+            "ID": "461084",
+            "URL": "https://www.showroom-live.com/r/46_tomisatonao",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "中西アルノ": {
+            "ID": "461085",
+            "URL": "https://www.showroom-live.com/r/46_nakanishiaruno",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "愛宕心響": {
+            "ID": "547939",
+            "URL": "https://www.showroom-live.com/r/46_atagokokone",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "大越ひなの": {
+            "ID": "547940",
+            "URL": "https://www.showroom-live.com/r/46_okoshihinano",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小津玲奈": {
+            "ID": "547941",
+            "URL": "https://www.showroom-live.com/r/46_ozureina",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "海邉朱莉": {
+            "ID": "547942",
+            "URL": "https://www.showroom-live.com/r/46_kaibeakari",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "川端晃菜": {
+            "ID": "547943",
+            "URL": "https://www.showroom-live.com/r/46_kawabatahina",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "鈴木佑捺": {
+            "ID": "547944",
+            "URL": "https://www.showroom-live.com/r/46_suzukiyuuna",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "瀬戸口心月": {
+            "ID": "547945",
+            "URL": "https://www.showroom-live.com/r/46_setoguchimitsuki",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "長嶋凛桜": {
+            "ID": "547946",
+            "URL": "https://www.showroom-live.com/r/46_nagashimario",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "増田三莉音": {
+            "ID": "547947",
+            "URL": "https://www.showroom-live.com/r/46_masudamirine",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "森平麗心": {
+            "ID": "547948",
+            "URL": "https://www.showroom-live.com/r/46_morihiraurumi",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "矢田萌華": {
+            "ID": "547949",
+            "URL": "https://www.showroom-live.com/r/46_yadamoeka",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        }
+    },
+    "櫻坂46": {
+        "井上梨名": {
+            "ID": "201108",
+            "URL": "https://www.showroom-live.com/r/46_RINA_INOUE",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "武元唯衣": {
+            "ID": "199913",
+            "URL": "https://www.showroom-live.com/r/46_YUI_TAKEMOTO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "田村保乃": {
+            "ID": "201122",
+            "URL": "https://www.showroom-live.com/r/46_HONO_TAMURA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "藤吉夏鈴": {
+            "ID": "201093",
+            "URL": "https://www.showroom-live.com/r/46_KARIN_FUJIYOSHI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "松田里奈": {
+            "ID": "199910",
+            "URL": "https://www.showroom-live.com/r/46_RINA_MATSUDA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "森田ひかる": {
+            "ID": "199909",
+            "URL": "https://www.showroom-live.com/r/46_HIKARU_MORITA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "山﨑天": {
+            "ID": "201098",
+            "URL": "https://www.showroom-live.com/r/46_TEN_YAMASAKI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "遠藤光莉": {
+            "ID": "200834",
+            "URL": "https://www.showroom-live.com/r/46_HIKARI_ENDO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "大園玲": {
+            "ID": "199906",
+            "URL": "https://www.showroom-live.com/r/46_REI_OZONO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "大沼晶保": {
+            "ID": "201124",
+            "URL": "https://www.showroom-live.com/r/46_AKIHO_ONUMA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "幸阪茉里乃": {
+            "ID": "199897",
+            "URL": "https://www.showroom-live.com/r/46_MARINO_KOUSAKA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "増本綺良": {
+            "ID": "201097",
+            "URL": "https://www.showroom-live.com/r/46_KIRA_MASUMOTO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "守屋麗奈": {
+            "ID": "199339",
+            "URL": "https://www.showroom-live.com/r/46_RENA_MORIYA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "石森璃花": {
+            "ID": "479507",
+            "URL": "https://www.showroom-live.com/r/46_RIKA_ISHIMORI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "遠藤理子": {
+            "ID": "479508",
+            "URL": "https://www.showroom-live.com/r/46_RIKO_ENDO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小田倉麗奈": {
+            "ID": "479509",
+            "URL": "https://www.showroom-live.com/r/46_REINA_ODAKURA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小島凪紗": {
+            "ID": "479510",
+            "URL": "https://www.showroom-live.com/r/46_NAGISA_KOJIMA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "谷口愛季": {
+            "ID": "479511",
+            "URL": "https://www.showroom-live.com/r/46_AIRI_TANIGUCHI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "中嶋優月": {
+            "ID": "479512",
+            "URL": "https://www.showroom-live.com/r/46_YUZUKI_NAKASHIMA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "的野美青": {
+            "ID": "479513",
+            "URL": "https://www.showroom-live.com/r/46_MIO_MATONO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "向井純葉": {
+            "ID": "479514",
+            "URL": "https://www.showroom-live.com/r/46_ITOHA_MUKAI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "村井優": {
+            "ID": "479515",
+            "URL": "https://www.showroom-live.com/r/46_YU_MURAI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "村山美羽": {
+            "ID": "479517",
+            "URL": "https://www.showroom-live.com/r/46_MIU_MURAYAMA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "山下瞳月": {
+            "ID": "479519",
+            "URL": "https://www.showroom-live.com/r/46_SHIZUKI_YAMASHITA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "浅井恋乃未": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "稲熊ひな": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "勝又春": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "佐藤愛桜": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "中川智尋": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "松本和子": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "目黒陽色": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "山川宇衣": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "山田桃実": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        }
+    },
+    "日向坂46": {
+        "金村美玖": {
+            "ID": "134049",
+            "URL": "https://www.showroom-live.com/r/46_MIKU_KANEMURA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "河田陽菜": {
+            "ID": "134045",
+            "URL": "https://www.showroom-live.com/r/46_HINA_KAWATA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小坂菜緒": {
+            "ID": "134059",
+            "URL": "https://www.showroom-live.com/r/46_NAO_KOSAKA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "松田好花": {
+            "ID": "134054",
+            "URL": "https://www.showroom-live.com/r/46_KONOKA_MATSUDA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "上村ひなの": {
+            "ID": "199345",
+            "URL": "https://www.showroom-live.com/r/46_HINANO_KAMIMURA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "髙橋未来虹": {
+            "ID": "200828",
+            "URL": "https://www.showroom-live.com/r/46_MIKUNI_TAKAHASHI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "森本茉莉": {
+            "ID": "199322",
+            "URL": "https://www.showroom-live.com/r/46_MARIE_MORIMOTO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "山口陽世": {
+            "ID": "201110",
+            "URL": "https://www.showroom-live.com/r/46_HARUYO_YAMAGUCHI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "石塚瑶季": {
+            "ID": "457901",
+            "URL": "https://www.showroom-live.com/r/46_ISHIZUKA_TAMAKI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "小西夏菜実": {
+            "ID": "459312",
+            "URL": "https://www.showroom-live.com/r/46_KONISHI_NANAMI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "清水理央": {
+            "ID": "457908",
+            "URL": "https://www.showroom-live.com/r/46_SHIMIZU_RIO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "正源司陽子": {
+            "ID": "459313",
+            "URL": "https://www.showroom-live.com/r/46_SHOGENJI_YOKO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "竹内希来里": {
+            "ID": "457910",
+            "URL": "https://www.showroom-live.com/r/46_TAKEUCHI_KIRARI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "平尾帆夏": {
+            "ID": "457911",
+            "URL": "https://www.showroom-live.com/r/46_HIRAO_HONOKA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "平岡海月": {
+            "ID": "459314",
+            "URL": "https://www.showroom-live.com/r/46_HIRAOKA_MITSUKI",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "藤嶌果歩": {
+            "ID": "459315",
+            "URL": "https://www.showroom-live.com/r/46_FUJISHIMA_KAHO",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "宮地すみれ": {
+            "ID": "457915",
+            "URL": "https://www.showroom-live.com/r/46_MIYACHI_SUMIRE",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "山下葉留花": {
+            "ID": "457916",
+            "URL": "https://www.showroom-live.com/r/46_YAMASHITA_HARUKA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "渡辺莉奈": {
+            "ID": "457917",
+            "URL": "https://www.showroom-live.com/r/46_WATANABE_RINA",
+            "isLive": 1,
+            "nextLive": {
+                "text": "TBD"
+            }
+        },
+        "大野愛実": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "鶴崎仁香": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "坂井新奈": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "佐藤優羽": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "下田衣珠季": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "片山紗希": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "大田美月": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "高井俐香": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "松尾桜": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        },
+        "蔵盛妃那乃": {
+            "ID": "",
+            "URL": "",
+            "isLive": 1,
+            "nextLive": {
+                "epoch": null,
+                "text": "TBD"
+            }
+        }
+    }
+}
