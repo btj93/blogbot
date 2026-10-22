@@ -52,9 +52,8 @@ func (h *Handler) handleEditSublist(ctx context.Context, msg *tgbotapi.Message) 
 		return
 	}
 
-	if err := h.tg.SendText(ctx, msg.Chat.ID, editSublistText, &telegram.SendTextOpts{
-		ReplyMarkup: kb,
-	}); err != nil {
+	opts := &telegram.SendTextOpts{ReplyMarkup: kb}
+	if err := h.tg.SendText(ctx, msg.Chat.ID, editSublistText, opts); err != nil {
 		slog.ErrorContext(ctx, "failed to send editsublist text", slog.Any("error", err))
 	}
 }
@@ -66,9 +65,8 @@ func (h *Handler) sendWebAppButton(ctx context.Context, msg *tgbotapi.Message) {
 	button := tgbotapi.InlineKeyboardButton{Text: "開啟訂閱管理", URL: &url}
 	kb := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(button))
 
-	if err := h.tg.SendText(ctx, msg.Chat.ID, editSublistText, &telegram.SendTextOpts{
-		ReplyMarkup: kb,
-	}); err != nil {
+	opts := &telegram.SendTextOpts{ReplyMarkup: kb}
+	if err := h.tg.SendText(ctx, msg.Chat.ID, editSublistText, opts); err != nil {
 		slog.ErrorContext(ctx, "failed to send webapp button", slog.Any("error", err))
 	}
 }

@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 	hostPort := resource.GetHostPort("5432/tcp")
 	testDSN = fmt.Sprintf("postgres://test:test@localhost:%s/blogbot_test?sslmode=disable", hostPort)
 
-	if err := pool.Retry(func() error {
+	ping := func() error {
 		db, err := sql.Open("pgx", testDSN)
 		if err != nil {
 			return err
@@ -50,7 +50,8 @@ func TestMain(m *testing.M) {
 		defer db.Close()
 
 		return db.PingContext(context.Background())
-	}); err != nil {
+	}
+	if err := pool.Retry(ping); err != nil {
 		slog.Error("could not connect to postgres", slog.Any("error", err))
 		return
 	}

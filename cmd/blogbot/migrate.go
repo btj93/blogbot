@@ -89,8 +89,9 @@ func runMigrate(_ *cobra.Command, _ []string) error {
 				}
 
 				var memberID int64
-				if err := tx.QueryRowContext(ctx, "SELECT id FROM members WHERE group_id = $1 AND name = $2", groupID, memberName).
-					Scan(&memberID); err != nil {
+
+				row := tx.QueryRowContext(ctx, "SELECT id FROM members WHERE group_id = $1 AND name = $2", groupID, memberName)
+				if err := row.Scan(&memberID); err != nil {
 					return fmt.Errorf("querying member id for %s: %w", memberName, err)
 				}
 
@@ -152,8 +153,9 @@ func runMigrate(_ *cobra.Command, _ []string) error {
 				}
 
 				var memberID int64
-				if err := tx.QueryRowContext(ctx, "SELECT id FROM members WHERE group_id = $1 AND name = $2", groupID, memberName).
-					Scan(&memberID); err != nil {
+
+				row := tx.QueryRowContext(ctx, "SELECT id FROM members WHERE group_id = $1 AND name = $2", groupID, memberName)
+				if err := row.Scan(&memberID); err != nil {
 					return fmt.Errorf("querying member id for %s: %w", memberName, err)
 				}
 

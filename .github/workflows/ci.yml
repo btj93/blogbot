@@ -62,7 +62,7 @@ jobs:
           # Pinned, not "latest": a newer linter than the one on a workstation
           # turns a locally clean tree into a red build, and the reverse hides
           # real findings. Bump this deliberately.
-          version: v2.13.2
+          version: v2.15.0
           args: --config .github/.golangci.yml
 
   webapp:

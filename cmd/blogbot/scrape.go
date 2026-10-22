@@ -161,12 +161,8 @@ func runScrape(_ *cobra.Command, _ []string) error {
 				msgText := fmt.Sprintf("#%s 「%s」\n\n%s", blog.Name, blog.Title, blog.URL)
 
 				// Send to log chat
-				if err := tg.SendText(
-					ctx,
-					tg.LogChatID(),
-					msgText,
-					&telegram.SendTextOpts{DisableWebPagePreview: true},
-				); err != nil {
+				logOpts := &telegram.SendTextOpts{DisableWebPagePreview: true}
+				if err := tg.SendText(ctx, tg.LogChatID(), msgText, logOpts); err != nil {
 					slog.ErrorContext(ctx, "failed to send to log chat", slog.Any("error", err))
 				}
 
