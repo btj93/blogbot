@@ -10,7 +10,7 @@
     "sourceType": "module",
     "project": ["tsconfig.json"]
   },
-  "plugins": ["react", "prettier", "jest"],
+  "plugins": ["react", "prettier"],
   "rules": {
     "quotes": ["error", "single"],
     "indent": "off",

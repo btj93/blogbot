@@ -12,7 +12,7 @@ bun run start      # dev server on http://localhost:8080
 bun run build      # production bundle into build/
 ```
 
-`PUBLIC_URL=/tg/blogbot` in `.env.production` fixes the deployed base path; the
+`base` in `vite.config.ts` fixes the deployed path to `/tg/blogbot/`; the
 bundle will not resolve its assets if that value is changed without also
 changing where the Go server mounts it.
 

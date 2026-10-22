@@ -1,6 +1,6 @@
 import { type Member, type MemberImages } from './types'
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || ''
+const API_BASE: string = import.meta.env.VITE_API_BASE_URL || ''
 
 export class ApiError extends Error {
   status: number
