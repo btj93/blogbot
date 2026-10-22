@@ -212,7 +212,7 @@ export const EditMembers = () => {
     onClick: () => {
       void onClickMainButton()
     },
-    disable: isSaving,
+    disabled: isSaving,
   }
 
   const tabConfigs: AnimatedTabConfig[] = membersByGroupEntries.map(
