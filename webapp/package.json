@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "typecheck": "node node_modules/@typescript/native/bin/tsc",
-    "build": "bun run typecheck && vite build",
+    "typecheck": "tsc",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint-staged": "prettier --write ."
+    "lint": "oxlint --type-aware",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.4.9",
@@ -25,21 +27,17 @@
     "react-redux": "^8.0.5",
     "react-spinners": "^0.13.8",
     "react-swipeable": "^7.0.0",
-    "redux": "^4.2.1",
-    "web-vitals": "^2.1.4"
+    "redux": "^4.2.1"
   },
   "devDependencies": {
     "@redux-devtools/core": "^3.13.1",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.1.2",
-    "eslint": "^9.39.5",
-    "eslint-config-love": "^155.0.0",
-    "eslint-plugin-react": "^7.37.5",
-    "prettier": "^2.8.3",
-    "prettier-plugin-organize-imports": "^3.2.2",
-    "typescript": "^6.0.3",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "oxlint-tsgolint": "^7.0.2004",
+    "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^4.1.12"
   }

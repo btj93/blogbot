@@ -6,6 +6,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { ScaleLoader } from 'react-spinners'
+
 import {
   acquireLock,
   ApiError,
@@ -72,18 +73,23 @@ export const EditMembers = () => {
       }
     }
 
-    loadData()
+    void loadData()
 
-    // Load images independently — don't block the member list.
-    fetchMemberImages().then(images => dispatch(setMemberImages(images)))
+    // Load images independently — don't block the member list. They are
+    // decorative, so a failure leaves the list without photos.
+    fetchMemberImages()
+      .then(images => dispatch(setMemberImages(images)))
+      .catch(() => {})
   }, [dispatch])
 
   const members = useMembers()
   const originalMembers = useOriginalMembers()
   const membersRef = useRef(members)
   const originalMembersRef = useRef(originalMembers)
-  membersRef.current = members
-  originalMembersRef.current = originalMembers
+  useEffect(() => {
+    membersRef.current = members
+    originalMembersRef.current = originalMembers
+  }, [members, originalMembers])
 
   // Group members by group name, sorted by GroupInfos key order.
   // Memoized because group membership never changes — only subscribed toggles.

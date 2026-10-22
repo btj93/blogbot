@@ -1,4 +1,4 @@
-.PHONY: install dev build lint deploy
+.PHONY: install dev build lint fmt deploy
 
 install:
 	bun install --frozen-lockfile
@@ -10,7 +10,10 @@ build:
 	bun run build
 
 lint:
-	bun run lint-staged
+	bun run fmt:check && bun run lint
+
+fmt:
+	bun run fmt
 
 deploy:
 	./scripts/deploy.sh

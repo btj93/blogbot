@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": ["build/", "bun.lock"],
+  "sortImports": true
+}

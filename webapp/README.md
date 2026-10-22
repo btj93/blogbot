@@ -9,7 +9,9 @@ the Go binary under `/tg/blogbot`.
 ```bash
 bun install
 bun run start      # dev server on http://localhost:8080
-bun run build      # production bundle into build/
+bun run build      # type-check (TypeScript 7) + production bundle into build/
+bun run lint       # oxlint with type-aware rules
+bun run fmt        # oxfmt; CI runs fmt:check
 ```
 
 `base` in `vite.config.ts` fixes the deployed path to `/tg/blogbot/`; the

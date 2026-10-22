@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react'
 import React, { useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
+
 import { updateMembers } from '../../redux/member'
 import { type Member } from '../../types'
 import { MemberCard } from './memberCard'
