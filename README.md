@@ -91,6 +91,20 @@ blogbot migrate             # One-time: import Python-era JSON data
 
 All commands accept `--config <path>` (default: `./config.toml`).
 
+### Owner-only subscription diagnostics
+
+Forward a message to the bot in your configured private `telegram.log_chat_id`
+conversation. It automatically replies there with the exposed original user/chat
+ID, saved subscriptions, and disabled members. You can also reply to a forwarded
+message with `/debug`. Both the sender's user ID and the destination private chat
+ID must equal the positive `log_chat_id`; no other user or chat can use this feature.
+
+Telegram may hide a forwarded sender's ID, in which case no lookup is possible.
+An ordinary forwarded user message exposes the user's private-chat subscriptions,
+not the original group's ID or subscriptions. Channel/chat-origin forwards are
+looked up using their origin chat ID instead. Saved subscriptions alone do not
+prove successful delivery.
+
 ## Deploy to Oracle Cloud (Linux)
 
 ### 1. Provision the instance

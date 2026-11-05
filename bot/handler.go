@@ -51,18 +51,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.processUpdate(ctx, &update)
+	h.processUpdate(ctx, &update, body)
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("ok"))
 }
 
-func (h *Handler) processUpdate(ctx context.Context, update *tgbotapi.Update) {
+func (h *Handler) processUpdate(ctx context.Context, update *tgbotapi.Update, body []byte) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.ErrorContext(ctx, "recovered from panic in processUpdate", slog.Any("panic", r))
 		}
 	}()
+
+	if h.handleDebugForward(ctx, update.Message, body) {
+		return
+	}
 
 	if update.CallbackQuery != nil {
 		if h.useWebApp {
