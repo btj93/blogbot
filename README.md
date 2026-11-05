@@ -143,6 +143,22 @@ Bot credentials are redacted from structured error/string fields, admin log text
 and CLI failure output. These logs still contain user/chat IDs and subscription
 choices, so keep server access restricted. The new events are not retroactive.
 
+## Scrape ordering and catch-up
+
+HTTP compression is managed by Go's transport, including gzip decompression.
+Hinata posts are processed oldest-first by their official JST publication time;
+posts sharing a publication minute retain the site's oldest-first listing order.
+A missing or invalid publication time fails that Hinata scrape before any posts
+are claimed, rather than guessing their order. Publication times appear in post
+and delivery logs as `published_at`. Each post's delivery attempts finish before
+the next post starts, and downloaded photos retain their original URL order.
+
+A PostgreSQL session advisory lock allows only one scrape per database at a time;
+overlapping scheduled runs log `scrape skipped` and exit without sending. An
+unprocessed post still present in the current feed is automatically eligible for
+normal delivery after recovery. Older posts outside the first-page feed are not
+backfilled. The existing claim/no-replay behavior for failed attempts is unchanged.
+
 ## Deploy to Oracle Cloud (Linux)
 
 ### 1. Provision the instance

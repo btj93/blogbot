@@ -15,7 +15,7 @@ func TestHinaScraper_Scrape(t *testing.T) {
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write(data)
+		writeGzip(t, w, data)
 	}))
 	defer ts.Close()
 
@@ -41,6 +41,14 @@ func TestHinaScraper_Scrape(t *testing.T) {
 
 		if b.URL == "" {
 			t.Errorf("blog[%d].URL is empty", i)
+		}
+
+		if b.PublishedAt.IsZero() {
+			t.Errorf("blog[%d].PublishedAt is empty", i)
+		}
+
+		if i > 0 && b.PublishedAt.Before(blogs[i-1].PublishedAt) {
+			t.Errorf("blog[%d] is older than the previous post", i)
 		}
 	}
 }

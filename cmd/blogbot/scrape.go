@@ -40,6 +40,23 @@ func runScrape(_ *cobra.Command, _ []string) error {
 	}
 	defer db.Close()
 
+	release, acquired, err := db.TryScrapeLock(ctx)
+	if err != nil {
+		return fmt.Errorf("locking scrape: %w", err)
+	}
+
+	if !acquired {
+		slog.InfoContext(ctx, "scrape skipped", slog.String("reason", "another scrape is still running"))
+
+		return nil
+	}
+
+	defer func() {
+		if err := release(); err != nil {
+			slog.ErrorContext(ctx, "failed to release scrape lock", slog.Any("error", err))
+		}
+	}()
+
 	tg, err := telegram.NewClient(cfg.Telegram.BotToken, cfg.Telegram.LogChatID, 5)
 	if err != nil {
 		return fmt.Errorf("creating telegram client: %w", err)

@@ -107,6 +107,9 @@ func processBlogs(
 
 	for _, blog := range blogs {
 		postCtx := observability.WithAttrs(ctx, slog.String("blog_url", blog.URL), slog.String("member_name", blog.Name))
+		if !blog.PublishedAt.IsZero() {
+			postCtx = observability.WithAttrs(postCtx, slog.Time("published_at", blog.PublishedAt))
+		}
 
 		claimed, err := db.ClaimBlog(postCtx, blog.URL)
 		if err != nil {

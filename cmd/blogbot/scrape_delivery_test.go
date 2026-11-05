@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -61,15 +62,17 @@ type deliverySender struct {
 	failText, failMedia map[int64]bool
 	subscriberCalls     int
 	logTexts            []string
+	events              []string
 }
 
 func (*deliverySender) LogChatID() int64 { return 999 }
 func (s *deliverySender) LogText(_ context.Context, text string) {
 	s.logTexts = append(s.logTexts, text)
 }
-func (s *deliverySender) SendText(_ context.Context, chatID int64, _ string, _ *telegram.SendTextOpts) error {
+func (s *deliverySender) SendText(_ context.Context, chatID int64, text string, _ *telegram.SendTextOpts) error {
 	if chatID != 999 {
 		s.subscriberCalls++
+		s.events = append(s.events, fmt.Sprintf("%d:text:%s", chatID, text))
 	}
 
 	if s.failText[chatID] {
@@ -78,9 +81,10 @@ func (s *deliverySender) SendText(_ context.Context, chatID int64, _ string, _ *
 
 	return nil
 }
-func (s *deliverySender) SendMediaGroup(_ context.Context, chatID int64, _ [][]byte) error {
+func (s *deliverySender) SendMediaGroup(_ context.Context, chatID int64, images [][]byte) error {
 	if chatID != 999 {
 		s.subscriberCalls++
+		s.events = append(s.events, fmt.Sprintf("%d:media:%s", chatID, images))
 	}
 
 	if s.failMedia[chatID] {

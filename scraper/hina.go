@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 
@@ -38,9 +40,18 @@ func (s *HinaScraper) Scrape(ctx context.Context) ([]model.Blog, error) {
 		return nil, fmt.Errorf("hina parse: %w", err)
 	}
 
-	var result []model.Blog
+	var (
+		result   []model.Blog
+		parseErr error
+	)
+
+	jst := time.FixedZone("JST", 9*60*60)
 
 	doc.Find("div.l-maincontents--blog div.p-button__blog_detail").Each(func(_ int, btnDiv *goquery.Selection) {
+		if parseErr != nil {
+			return
+		}
+
 		parent := btnDiv.Parent()
 		articleHead := parent.Closest("div.p-blog-article")
 
@@ -53,6 +64,14 @@ func (s *HinaScraper) Scrape(ctx context.Context) ([]model.Blog, error) {
 		}
 
 		url := baseURL + href
+		date := strings.Join(strings.Fields(articleHead.Find("div.c-blog-article__date").First().Text()), " ")
+
+		publishedAt, err := time.ParseInLocation("2006.1.2 15:04", date, jst)
+		if err != nil {
+			parseErr = fmt.Errorf("hina publication date for %s: %w", url, err)
+
+			return
+		}
 
 		var imgURLs []string
 
@@ -66,16 +85,23 @@ func (s *HinaScraper) Scrape(ctx context.Context) ([]model.Blog, error) {
 		})
 
 		result = append(result, model.Blog{
-			Title:     title,
-			Name:      name,
-			URL:       url,
-			ImageURLs: imgURLs,
+			Title:       title,
+			Name:        name,
+			URL:         url,
+			ImageURLs:   imgURLs,
+			PublishedAt: publishedAt,
 		})
 	})
 
-	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
-		result[i], result[j] = result[j], result[i]
+	if parseErr != nil {
+		return nil, parseErr
 	}
+
+	// Keep the site's oldest-first order for posts sharing the same publication minute.
+	slices.Reverse(result)
+	slices.SortStableFunc(result, func(a, b model.Blog) int {
+		return a.PublishedAt.Compare(b.PublishedAt)
+	})
 
 	return result, nil
 }

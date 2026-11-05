@@ -46,8 +46,9 @@ type ShowroomRoom struct {
 }
 
 type Blog struct {
-	Title     string
-	Name      string // member name
-	URL       string
-	ImageURLs []string
+	Title       string
+	Name        string // member name
+	URL         string
+	ImageURLs   []string
+	PublishedAt time.Time
 }

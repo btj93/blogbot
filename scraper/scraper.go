@@ -20,7 +20,6 @@ type Scraper interface {
 
 var defaultHeaders = http.Header{
 	"Accept":                    {"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"},
-	"Accept-Encoding":           {"gzip, deflate"},
 	"Accept-Language":           {"en-GB,en-US;q=0.9,en;q=0.8"},
 	"Dnt":                       {"1"},
 	"Upgrade-Insecure-Requests": {"1"},
@@ -63,7 +62,7 @@ func fetchBody(ctx context.Context, url, userAgent string, client *http.Client) 
 }
 
 // DownloadImages downloads images concurrently with bounded parallelism.
-// Filters out nil/failed downloads. Returns flat slice of valid image bytes.
+// Filters out nil/failed downloads while preserving the input URL order.
 func DownloadImages(ctx context.Context, urls []string, userAgent string, client *http.Client) ([][]byte, error) {
 	if len(urls) == 0 {
 		return nil, nil
@@ -71,13 +70,11 @@ func DownloadImages(ctx context.Context, urls []string, userAgent string, client
 
 	sem := semaphore.NewWeighted(10)
 
-	var (
-		mu     sync.Mutex
-		wg     sync.WaitGroup
-		images [][]byte
-	)
+	var wg sync.WaitGroup
 
-	for _, u := range urls {
+	images := make([][]byte, len(urls))
+
+	for i, u := range urls {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return nil, err
 		}
@@ -85,19 +82,21 @@ func DownloadImages(ctx context.Context, urls []string, userAgent string, client
 		wg.Go(func() {
 			defer sem.Release(1)
 
-			data := downloadOneImage(ctx, u, userAgent, client)
-			if data != nil {
-				mu.Lock()
-
-				images = append(images, data)
-				mu.Unlock()
-			}
+			images[i] = downloadOneImage(ctx, u, userAgent, client)
 		})
 	}
 
 	wg.Wait()
 
-	return images, nil
+	var successful [][]byte
+
+	for _, image := range images {
+		if image != nil {
+			successful = append(successful, image)
+		}
+	}
+
+	return successful, nil
 }
 
 func downloadOneImage(ctx context.Context, url, userAgent string, client *http.Client) []byte {
