@@ -177,15 +177,8 @@ func TestDebugForwardNormalMessageAndHelp(t *testing.T) {
 		t.Fatalf("ordinary message triggered debug: %q", got)
 	}
 
-	if got := debugRequest(
-		t,
-		fs,
-		nil,
-		`{"chat":{"id":99,"type":"private"},"from":{"id":99},"text":"/debug"}`,
-	); !strings.Contains(
-		got,
-		"Forward a message here",
-	) {
+	got := debugRequest(t, fs, nil, `{"chat":{"id":99,"type":"private"},"from":{"id":99},"text":"/debug"}`)
+	if !strings.Contains(got, "Forward a message here") {
 		t.Fatalf("missing usage: %q", got)
 	}
 }
