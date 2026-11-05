@@ -105,6 +105,44 @@ not the original group's ID or subscriptions. Channel/chat-origin forwards are
 looked up using their origin chat ID instead. Saved subscriptions alone do not
 prove successful delivery.
 
+### Diagnostic logs
+
+Detailed events go to the server's JSON logs under `/var/log/blogbot/`, not to
+Telegram. The setup script configures daily rotation with 14 backups. Use numeric
+user/chat IDs for investigation; display names and forwarded attribution are not
+reliable identifiers.
+
+- `bot command received`: recognized command, acting user ID, destination chat ID
+  and type. Command arguments and message bodies are not recorded in this event.
+- `subscription list loaded`: user/chat IDs and the subscribed member IDs included
+  in the webapp response (disabled members are not displayed).
+- `subscription changed`: destination chat, member ID and subscribed/unsubscribed
+  state, only for actual mutations after commit. Interactive changes include the
+  acting user ID; migrations have no Telegram actor. `subscription save completed`
+  separately counts submitted operations, including no-ops.
+- `group scrape completed` / `scrape returned no posts`: parsed count and group.
+  Empty feeds produce a warning; this is not a fix for upstream/parser problems.
+- `group processing completed`: parsed/new/already-seen counts, disabled/no-subscriber/
+  log-only skips, recipient outcomes and processing errors.
+- `telegram send accepted` / `telegram send failed` / `telegram send retry`:
+  method, destination chat, accepted message IDs or failure/retry information.
+  Blog sends also carry group, member ID, post URL and scrape run ID.
+- `notification attempt completed`: independent text/media outcome per recipient,
+  including partial results and incomplete image downloads. Per-recipient details
+  and retries are no longer sent to the Telegram log chat.
+
+`posts_sent` counts distinct new posts with at least one complete subscriber
+notification accepted by Telegram; disabled, log-only, unsubscribed, partial-only
+and failed-only posts do not count. Recipient outcomes are separate counters.
+Processing errors exclude failures to send diagnostic `LogText` messages, which
+are recorded by the Telegram client instead. API acceptance does not prove the
+recipient read the message. Failed notifications retain the existing no-replay
+behavior; these changes add diagnostics, not a delivery queue.
+
+Bot credentials are redacted from structured error/string fields, admin log text,
+and CLI failure output. These logs still contain user/chat IDs and subscription
+choices, so keep server access restricted. The new events are not retroactive.
+
 ## Deploy to Oracle Cloud (Linux)
 
 ### 1. Provision the instance

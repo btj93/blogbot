@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"os"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -18,7 +19,7 @@ func TestMain(m *testing.M) {
 	pool, err := dockertest.NewPool("")
 	if err != nil {
 		slog.Error("could not construct pool", slog.Any("error", err))
-		return
+		os.Exit(1)
 	}
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
@@ -36,11 +37,11 @@ func TestMain(m *testing.M) {
 	})
 	if err != nil {
 		slog.Error("could not start resource", slog.Any("error", err))
-		return
+		os.Exit(1)
 	}
 
 	hostPort := resource.GetHostPort("5432/tcp")
-	testDSN = fmt.Sprintf("postgres://test:test@localhost:%s/blogbot_test?sslmode=disable", hostPort)
+	testDSN = fmt.Sprintf("postgres://test:test@%s/blogbot_test?sslmode=disable", hostPort)
 
 	ping := func() error {
 		db, err := sql.Open("pgx", testDSN)
@@ -53,14 +54,23 @@ func TestMain(m *testing.M) {
 	}
 	if err := pool.Retry(ping); err != nil {
 		slog.Error("could not connect to postgres", slog.Any("error", err))
-		return
+
+		if err := pool.Purge(resource); err != nil {
+			slog.Error("could not purge resource", slog.Any("error", err))
+		}
+
+		os.Exit(1)
 	}
 
-	m.Run()
+	code := m.Run()
 
 	if err := pool.Purge(resource); err != nil {
 		slog.Error("could not purge resource", slog.Any("error", err))
+
+		code = 1
 	}
+
+	os.Exit(code)
 }
 
 func newTestStore(t *testing.T) *Store {

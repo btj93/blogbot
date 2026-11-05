@@ -40,7 +40,20 @@ func (h ContextHandler) observe(ctx context.Context) []slog.Attr {
 		as = append(as, slog.Any(k.Key(), v))
 	}
 
+	attrs, _ := ctx.Value(logAttrsKey{}).([]slog.Attr)
+	as = append(as, attrs...)
+
 	return as
+}
+
+type logAttrsKey struct{}
+
+// WithAttrs attaches trusted diagnostic fields to logs made with this context.
+func WithAttrs(ctx context.Context, attrs ...slog.Attr) context.Context {
+	previous, _ := ctx.Value(logAttrsKey{}).([]slog.Attr)
+	combined := append(append([]slog.Attr(nil), previous...), attrs...)
+
+	return context.WithValue(ctx, logAttrsKey{}, combined)
 }
 
 func (h ContextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {

@@ -11,6 +11,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+	"github.com/btj93/blogbot/observability"
 	"github.com/btj93/blogbot/store"
 	"github.com/btj93/blogbot/telegram"
 )
@@ -69,6 +70,7 @@ func handleCallback(
 	chatID := callback.Message.Chat.ID
 	messageID := callback.Message.MessageID
 	userID := callback.From.ID
+	ctx = observability.WithAttrs(ctx, slog.Int64("user_id", userID))
 	data := callback.Data
 
 	if !checkPermission(ctx, tg, chatID, userID) {

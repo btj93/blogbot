@@ -82,17 +82,33 @@ func (h *Handler) processUpdate(ctx context.Context, update *tgbotapi.Update, bo
 		return
 	}
 
-	if update.Message == nil || update.Message.Text == "" {
+	if update.Message == nil || update.Message.Text == "" || update.Message.Chat == nil || update.Message.From == nil {
 		return
 	}
 
 	text := update.Message.Text
+	ctx = observability.WithAttrs(ctx, slog.Int64("user_id", update.Message.From.ID))
+
+	var command string
 
 	switch {
-	case isCommand(text, "start") || isCommand(text, "help"):
-		handleHelp(ctx, h.tg, update.Message)
+	case isCommand(text, "start"):
+		command = "start"
+	case isCommand(text, "help"):
+		command = "help"
 	case isCommand(text, "editsublist"):
+		command = "editsublist"
+	default:
+		return
+	}
+
+	slog.InfoContext(ctx, "bot command received", slog.String("bot_command", command),
+		slog.Int64("chat_id", update.Message.Chat.ID), slog.String("chat_type", update.Message.Chat.Type))
+
+	if command == "editsublist" {
 		h.handleEditSublist(ctx, update.Message)
+	} else {
+		handleHelp(ctx, h.tg, update.Message)
 	}
 }
 

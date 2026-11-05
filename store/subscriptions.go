@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 )
 
 func (s *Store) AddSubscription(ctx context.Context, memberID int64, chatID string) (bool, error) {
@@ -16,6 +17,10 @@ func (s *Store) AddSubscription(ctx context.Context, memberID int64, chatID stri
 	}
 
 	n, _ := res.RowsAffected()
+	if n > 0 {
+		slog.InfoContext(ctx, "subscription changed", slog.String("chat_id", chatID),
+			slog.Int64("member_id", memberID), slog.Bool("subscribed", true))
+	}
 
 	return n > 0, nil
 }
@@ -30,6 +35,10 @@ func (s *Store) RemoveSubscription(ctx context.Context, memberID int64, chatID s
 	}
 
 	n, _ := res.RowsAffected()
+	if n > 0 {
+		slog.InfoContext(ctx, "subscription changed", slog.String("chat_id", chatID),
+			slog.Int64("member_id", memberID), slog.Bool("subscribed", false))
+	}
 
 	return n > 0, nil
 }
@@ -102,18 +111,21 @@ func (s *Store) AddSubscriptionForAllInGeneration(
 	generation *int,
 	chatID string,
 ) error {
-	var err error
+	var (
+		rows *sql.Rows
+		err  error
+	)
 	if generation == nil {
-		_, err = s.db.ExecContext(
+		rows, err = s.db.QueryContext(
 			ctx,
-			"INSERT INTO subscriptions (member_id, chat_id) SELECT id, $1 FROM members WHERE group_id = $2 AND generation IS NULL AND disabled = FALSE ON CONFLICT (member_id, chat_id) DO NOTHING",
+			"INSERT INTO subscriptions (member_id, chat_id) SELECT id, $1 FROM members WHERE group_id = $2 AND generation IS NULL AND disabled = FALSE ON CONFLICT (member_id, chat_id) DO NOTHING RETURNING member_id",
 			chatID,
 			groupID,
 		)
 	} else {
-		_, err = s.db.ExecContext(
+		rows, err = s.db.QueryContext(
 			ctx,
-			"INSERT INTO subscriptions (member_id, chat_id) SELECT id, $1 FROM members WHERE group_id = $2 AND generation = $3 AND disabled = FALSE ON CONFLICT (member_id, chat_id) DO NOTHING",
+			"INSERT INTO subscriptions (member_id, chat_id) SELECT id, $1 FROM members WHERE group_id = $2 AND generation = $3 AND disabled = FALSE ON CONFLICT (member_id, chat_id) DO NOTHING RETURNING member_id",
 			chatID,
 			groupID,
 			*generation,
@@ -124,7 +136,7 @@ func (s *Store) AddSubscriptionForAllInGeneration(
 		return fmt.Errorf("adding all subscriptions: %w", err)
 	}
 
-	return nil
+	return logSubscriptionRows(ctx, rows, chatID, true)
 }
 
 func (s *Store) AddSubscriptionTx(ctx context.Context, tx *sql.Tx, memberID int64, chatID string) (bool, error) {
@@ -161,18 +173,21 @@ func (s *Store) RemoveSubscriptionForAllInGeneration(
 	generation *int,
 	chatID string,
 ) error {
-	var err error
+	var (
+		rows *sql.Rows
+		err  error
+	)
 	if generation == nil {
-		_, err = s.db.ExecContext(
+		rows, err = s.db.QueryContext(
 			ctx,
-			"DELETE FROM subscriptions WHERE chat_id = $1 AND member_id IN (SELECT id FROM members WHERE group_id = $2 AND generation IS NULL AND disabled = FALSE)",
+			"DELETE FROM subscriptions WHERE chat_id = $1 AND member_id IN (SELECT id FROM members WHERE group_id = $2 AND generation IS NULL AND disabled = FALSE) RETURNING member_id",
 			chatID,
 			groupID,
 		)
 	} else {
-		_, err = s.db.ExecContext(
+		rows, err = s.db.QueryContext(
 			ctx,
-			"DELETE FROM subscriptions WHERE chat_id = $1 AND member_id IN (SELECT id FROM members WHERE group_id = $2 AND generation = $3 AND disabled = FALSE)",
+			"DELETE FROM subscriptions WHERE chat_id = $1 AND member_id IN (SELECT id FROM members WHERE group_id = $2 AND generation = $3 AND disabled = FALSE) RETURNING member_id",
 			chatID,
 			groupID,
 			*generation,
@@ -181,6 +196,32 @@ func (s *Store) RemoveSubscriptionForAllInGeneration(
 
 	if err != nil {
 		return fmt.Errorf("removing all subscriptions: %w", err)
+	}
+
+	return logSubscriptionRows(ctx, rows, chatID, false)
+}
+
+func logSubscriptionRows(ctx context.Context, rows *sql.Rows, chatID string, subscribed bool) error {
+	defer rows.Close()
+
+	var ids []int64
+
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return err
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		slog.InfoContext(ctx, "subscription changed", slog.String("chat_id", chatID),
+			slog.Int64("member_id", id), slog.Bool("subscribed", subscribed))
 	}
 
 	return nil

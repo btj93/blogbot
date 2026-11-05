@@ -798,8 +798,8 @@ func TestReleaseLock_WrongLockID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Try to release with wrong lock_id — should not error but lock remains.
-	if err := s.ReleaseLock(ctx, "-100", "wrong-lock-id"); err != nil {
+	// A different valid UUID must not release the lock.
+	if err := s.ReleaseLock(ctx, "-100", "00000000-0000-4000-8000-000000000000"); err != nil {
 		t.Fatal("ReleaseLock with wrong ID should not error:", err)
 	}
 

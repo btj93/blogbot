@@ -54,7 +54,7 @@ var (
 	})
 	PromTelegramSendErrors = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "blogbot_telegram_send_errors_total",
-		Help: "Total Telegram send failures after retries",
+		Help: "Total terminal Telegram send failures, including non-retryable errors",
 	})
 	PromWebhookRequests = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "blogbot_webhook_requests_total",

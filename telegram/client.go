@@ -50,6 +50,8 @@ type SendTextOpts struct {
 }
 
 func (c *Client) SendText(ctx context.Context, chatID int64, text string, opts *SendTextOpts) error {
+	ctx = observability.WithAttrs(ctx, slog.Int64("chat_id", chatID), slog.String("telegram_method", "sendMessage"))
+
 	msg := tgbotapi.NewMessage(chatID, text)
 	if opts != nil {
 		msg.DisableWebPagePreview = opts.DisableWebPagePreview
@@ -59,7 +61,11 @@ func (c *Client) SendText(ctx context.Context, chatID int64, text string, opts *
 	}
 
 	return c.sendWithRetry(ctx, func() error {
-		_, err := c.bot.Send(msg)
+		sent, err := c.bot.Send(msg)
+		if err == nil {
+			slog.InfoContext(ctx, "telegram send accepted", slog.Int("message_id", sent.MessageID))
+		}
+
 		return err
 	}, fmt.Sprintf("SendText to %d", chatID))
 }
@@ -68,6 +74,8 @@ func (c *Client) SendMediaGroup(ctx context.Context, chatID int64, photos [][]by
 	if len(photos) == 0 {
 		return nil
 	}
+
+	ctx = observability.WithAttrs(ctx, slog.Int64("chat_id", chatID), slog.String("telegram_method", "sendMediaGroup"))
 
 	var media []any
 
@@ -79,7 +87,16 @@ func (c *Client) SendMediaGroup(ctx context.Context, chatID int64, photos [][]by
 	cfg := tgbotapi.NewMediaGroup(chatID, media)
 
 	return c.sendWithRetry(ctx, func() error {
-		_, err := c.bot.SendMediaGroup(cfg)
+		sent, err := c.bot.SendMediaGroup(cfg)
+		if err == nil {
+			ids := make([]int, 0, len(sent))
+			for _, message := range sent {
+				ids = append(ids, message.MessageID)
+			}
+
+			slog.InfoContext(ctx, "telegram send accepted", slog.Any("message_ids", ids))
+		}
+
 		return err
 	}, fmt.Sprintf("SendMediaGroup to %d", chatID))
 }
@@ -91,31 +108,33 @@ func (c *Client) sendWithRetry(ctx context.Context, fn func() error, desc string
 			return nil
 		}
 
-		if attempt == c.maxRetries {
+		delay, shouldRetry := c.parseRetryError(err)
+		if attempt == c.maxRetries || !shouldRetry {
 			observability.TelegramSendErrors.Add(1)
 			observability.PromTelegramSendErrors.Inc()
 
-			return fmt.Errorf("%s failed after %d retries: %w", desc, c.maxRetries, err)
-		}
+			var code int
 
-		delay, shouldRetry := c.parseRetryError(err)
-		if !shouldRetry {
+			apiErr := &tgbotapi.Error{}
+			if errors.As(err, &apiErr) {
+				code = apiErr.Code
+			}
+
+			slog.ErrorContext(ctx, "telegram send failed", slog.Int("attempts", attempt+1),
+				slog.Int("telegram_error_code", code), slog.Any("error", err))
+
+			if attempt == c.maxRetries {
+				return fmt.Errorf("%s failed after %d retries: %w", desc, c.maxRetries, err)
+			}
+
 			return fmt.Errorf("%s: %w", desc, err)
 		}
 
+		slog.WarnContext(ctx, "telegram send retry", slog.Int("attempt", attempt+1),
+			slog.Duration("retry_after", delay), slog.Any("error", err))
 		time.Sleep(delay)
 		observability.TelegramRetries.Add(1)
 		observability.PromTelegramRetries.Inc()
-
-		// Log retry to log chat (after sleep, before retry)
-		if c.logChatID != 0 {
-			logMsg := tgbotapi.NewMessage(c.logChatID, fmt.Sprintf("Retrying %s: %v", desc, err))
-
-			logMsg.DisableWebPagePreview = true
-			if _, sendErr := c.bot.Send(logMsg); sendErr != nil {
-				slog.ErrorContext(ctx, "failed to send retry log", slog.Any("error", sendErr))
-			}
-		}
 	}
 
 	return nil // unreachable
@@ -210,7 +229,7 @@ func (c *Client) ResetChatMenuButton(_ context.Context) error {
 }
 
 func (c *Client) LogText(ctx context.Context, text string) {
-	text = formatLogText(ctx, text)
+	text = observability.RedactTelegramTokens(formatLogText(ctx, text))
 
 	if c.logChatID != 0 {
 		if err := c.SendText(ctx, c.logChatID, text, &SendTextOpts{DisableWebPagePreview: true}); err != nil {

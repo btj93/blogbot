@@ -196,6 +196,17 @@ func (h *Handler) HandleMembers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	subscribed := make([]int64, 0)
+
+	for _, member := range members {
+		if member.Subscribed {
+			subscribed = append(subscribed, member.ID)
+		}
+	}
+
+	slog.InfoContext(ctx, "subscription list loaded", slog.Int64("user_id", data.UserID),
+		slog.Int64("chat_id", data.ChatID), slog.Any("subscribed_member_ids", subscribed))
+
 	writeJSON(w, http.StatusOK, membersResponse{
 		ChatName: chatName,
 		Members:  members,
@@ -288,11 +299,19 @@ func (h *Handler) HandleSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx = observability.WithAttrs(ctx, slog.Int64("user_id", data.UserID))
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1MB limit
 
 	var req subscriptionsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		slog.WarnContext(
+			ctx,
+			"subscription save rejected",
+			slog.Int64("chat_id", data.ChatID),
+			slog.String("reason", "invalid_body"),
+		)
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid request body"})
+
 		return
 	}
 
@@ -305,35 +324,69 @@ func (h *Handler) HandleSubscriptions(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		slog.InfoContext(
+			ctx,
+			"subscription save completed",
+			slog.String("chat_id", chatIDStr),
+			slog.Int("submitted_changes", 0),
+		)
 		writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 
 		return
 	}
 
 	if req.LockID == "" {
+		slog.WarnContext(
+			ctx,
+			"subscription save rejected",
+			slog.String("chat_id", chatIDStr),
+			slog.String("reason", "missing_lock"),
+		)
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "missing lock_id"})
+
 		return
 	}
 
 	if err := h.applySubscriptionChangesWithLock(ctx, chatIDStr, req.LockID, req.Changes); err != nil {
 		if err.Error() == "invalid lock" {
+			slog.WarnContext(
+				ctx,
+				"subscription save rejected",
+				slog.String("chat_id", chatIDStr),
+				slog.String("reason", "invalid_lock"),
+			)
 			writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid lock_id"})
+
 			return
 		}
 
 		// Check if the error is a lock conflict.
 		if after, ok := strings.CutPrefix(err.Error(), "locked by "); ok {
+			slog.WarnContext(
+				ctx,
+				"subscription save rejected",
+				slog.String("chat_id", chatIDStr),
+				slog.String("reason", "locked"),
+			)
 			writeJSON(w, http.StatusConflict, lockErrorResponse{Error: "locked", Holder: after})
+
 			return
 		}
 
-		slog.ErrorContext(ctx, "failed to apply subscription changes", slog.Any("error", err))
+		slog.ErrorContext(
+			ctx,
+			"failed to apply subscription changes",
+			slog.String("chat_id", chatIDStr),
+			slog.Any("error", err),
+		)
 		h.tg.LogText(ctx, fmt.Sprintf("webapp: failed to apply subscription changes: %v", err))
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "internal error"})
 
 		return
 	}
 
+	slog.InfoContext(ctx, "subscription save completed", slog.String("chat_id", chatIDStr),
+		slog.Int("submitted_changes", len(req.Changes)))
 	h.tg.LogText(ctx, fmt.Sprintf("API subscription update\nUser: %d\nChat: %s\nChanges: %d",
 		data.UserID, chatIDStr, len(req.Changes)))
 
@@ -359,20 +412,33 @@ func (h *Handler) applySubscriptionChangesWithLock(
 		return err
 	}
 
+	applied := make([]subscriptionChange, 0, len(changes))
 	for _, c := range changes {
+		var changed bool
 		if c.Subscribed {
-			if _, err := h.db.AddSubscriptionTx(ctx, tx, c.MemberID, chatID); err != nil {
-				return fmt.Errorf("add subscription for member %d: %w", c.MemberID, err)
-			}
+			changed, err = h.db.AddSubscriptionTx(ctx, tx, c.MemberID, chatID)
 		} else {
-			if _, err := h.db.RemoveSubscriptionTx(ctx, tx, c.MemberID, chatID); err != nil {
-				return fmt.Errorf("remove subscription for member %d: %w", c.MemberID, err)
-			}
+			changed, err = h.db.RemoveSubscriptionTx(ctx, tx, c.MemberID, chatID)
+		}
+
+		if err != nil {
+			return fmt.Errorf("saving subscription for member %d: %w", c.MemberID, err)
+		}
+
+		if changed {
+			applied = append(applied, c)
 		}
 	}
 
 	if tx != nil {
-		return tx.Commit()
+		if err := tx.Commit(); err != nil {
+			return fmt.Errorf("commit subscription changes: %w", err)
+		}
+	}
+
+	for _, change := range applied {
+		slog.InfoContext(ctx, "subscription changed", slog.String("chat_id", chatID),
+			slog.Int64("member_id", change.MemberID), slog.Bool("subscribed", change.Subscribed))
 	}
 
 	return nil

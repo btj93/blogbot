@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -14,8 +15,9 @@ var (
 	cfgPath string
 
 	rootCmd = &cobra.Command{
-		Use:   "blogbot",
-		Short: "Telegram bot for Japanese idol group blog and Showroom notifications",
+		Use:           "blogbot",
+		Short:         "Telegram bot for Japanese idol group blog and Showroom notifications",
+		SilenceErrors: true,
 	}
 )
 
@@ -36,6 +38,7 @@ func loadConfig() (*config.Config, error) {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
+		slog.Error("command failed", slog.String("error", observability.RedactTelegramTokens(err.Error())))
 		os.Exit(1)
 	}
 }

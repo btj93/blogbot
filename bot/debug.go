@@ -42,6 +42,9 @@ func (h *Handler) handleDebugForward(ctx context.Context, msg *tgbotapi.Message,
 	meta := &envelope.Message
 	// Forwarded command text is data, not an instruction to inspect its reply.
 	if isCommand(msg.Text, "debug") && meta.Origin == nil && msg.ForwardDate == 0 {
+		slog.InfoContext(ctx, "bot command received", slog.String("bot_command", "debug"),
+			slog.Int64("user_id", msg.From.ID), slog.Int64("chat_id", msg.Chat.ID), slog.String("chat_type", msg.Chat.Type))
+
 		if msg.ReplyToMessage == nil {
 			h.sendDebug(ctx, "Forward a message here, or reply to a forwarded message with /debug.")
 			return true

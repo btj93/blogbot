@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"slices"
 	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/btj93/blogbot/model"
 	"github.com/btj93/blogbot/observability"
 	"github.com/btj93/blogbot/scraper"
 	"github.com/btj93/blogbot/store"
@@ -54,15 +52,10 @@ func runScrape(_ *cobra.Command, _ []string) error {
 
 	defer func() { observability.PromScrapeDuration.Observe(time.Since(start).Seconds()) }()
 
-	var postsFound, postsSent, scrapeErrors int
+	var totals scrapeStats
 
 	slog.InfoContext(ctx, "start searching blogs")
 	tg.LogText(ctx, "started")
-
-	type scrapeResult struct {
-		blogs []model.Blog
-		group string
-	}
 
 	scrapers := []struct {
 		scraper scraper.Scraper
@@ -78,17 +71,7 @@ func runScrape(_ *cobra.Command, _ []string) error {
 
 	for i, s := range scrapers {
 		g.Go(func() error {
-			blogs, err := s.scraper.Scrape(gctx)
-			if err != nil {
-				slog.ErrorContext(gctx, "scrape failed", slog.String("group", s.group), slog.Any("error", err))
-				observability.ScrapeErrorsTotal.Add(1)
-				observability.PromScrapeErrorsTotal.WithLabelValues(s.group).Inc()
-
-				return nil // Don't fail entire run for one group
-			}
-
-			results[i] = scrapeResult{blogs: blogs, group: s.group}
-
+			results[i] = scrapeGroup(gctx, s.scraper, s.group)
 			return nil
 		})
 	}
@@ -97,131 +80,29 @@ func runScrape(_ *cobra.Command, _ []string) error {
 		slog.ErrorContext(ctx, "scrape goroutine failed", slog.Any("error", err))
 	}
 
-	for _, r := range results {
-		if r.blogs == nil {
+	for _, result := range results {
+		if result.err != nil {
+			totals.Errors++
 			continue
 		}
 
-		grp, err := db.GetOrCreateGroup(ctx, r.group)
-		if err != nil {
-			slog.ErrorContext(ctx, "failed to get group", slog.String("group", r.group), slog.Any("error", err))
-
-			scrapeErrors++
-
-			continue
-		}
-
-		for _, blog := range r.blogs {
-			claimed, err := db.ClaimBlog(ctx, blog.URL)
-			if err != nil {
-				slog.ErrorContext(ctx, "failed to claim blog", slog.String("url", blog.URL), slog.Any("error", err))
-
-				scrapeErrors++
-
-				continue
-			}
-
-			if !claimed {
-				continue
-			}
-
-			slog.InfoContext(
-				ctx,
-				"new blog post",
-				slog.String("title", blog.Title),
-				slog.String("name", blog.Name),
-				slog.String("url", blog.URL),
-			)
-
-			postsFound++
-
-			observability.ScrapePostsFound.Add(1)
-			observability.PromScrapePostsFound.WithLabelValues(r.group).Inc()
-			tg.LogText(ctx, fmt.Sprintf("%s %s\n%s", blog.Title, blog.Name, blog.URL))
-
-			// Auto-create member
-			isStaff := slices.Contains(cfg.Scraper.StaffNames, blog.Name)
-
-			member, err := db.GetOrCreateMember(ctx, grp.ID, blog.Name, nil, isStaff)
-			if err != nil {
-				slog.ErrorContext(ctx, "failed to create member", slog.Any("error", err))
-
-				scrapeErrors++
-
-				continue
-			}
-
-			if !member.Disabled {
-				// Download images
-				images, err := scraper.DownloadImages(ctx, blog.ImageURLs, cfg.Scraper.UserAgent, nil)
-				if err != nil {
-					slog.ErrorContext(ctx, "failed to download images", slog.Any("error", err))
-				}
-
-				msgText := fmt.Sprintf("#%s 「%s」\n\n%s", blog.Name, blog.Title, blog.URL)
-
-				// Send to log chat
-				logOpts := &telegram.SendTextOpts{DisableWebPagePreview: true}
-				if err := tg.SendText(ctx, tg.LogChatID(), msgText, logOpts); err != nil {
-					slog.ErrorContext(ctx, "failed to send to log chat", slog.Any("error", err))
-				}
-
-				for _, batch := range scraper.BatchImagesGrouped(images, 10) {
-					if err := tg.SendMediaGroup(ctx, tg.LogChatID(), batch); err != nil {
-						slog.ErrorContext(ctx, "failed to send media group to log chat", slog.Any("error", err))
-					}
-				}
-
-				// Send to subscribers (skip in log-only mode)
-				if cfg.Scraper.LogOnly {
-					slog.InfoContext(ctx, "log-only mode, skipping subscriber notifications",
-						slog.String("name", blog.Name), slog.String("title", blog.Title))
-				} else {
-					chatIDs, err := db.GetSubscriberChatIDs(ctx, member.ID)
-					if err != nil {
-						slog.ErrorContext(ctx, "failed to get subscribers", slog.Any("error", err))
-					}
-
-					for _, chatID := range chatIDs {
-						cid := parseChatID(chatID)
-						if err := tg.SendText(ctx, cid, msgText, &telegram.SendTextOpts{DisableWebPagePreview: true}); err != nil {
-							slog.ErrorContext(ctx, "failed to send to subscriber", slog.Any("error", err))
-						}
-
-						for _, batch := range scraper.BatchImagesGrouped(images, 10) {
-							if err := tg.SendMediaGroup(ctx, cid, batch); err != nil {
-								slog.ErrorContext(ctx, "failed to send media group to subscriber", slog.Any("error", err))
-							}
-						}
-
-						tg.LogText(ctx, fmt.Sprintf("sent #%s 「%s」 to %s", blog.Name, blog.Title, chatID))
-					}
-				}
-			}
-
-			postsSent++
-		}
+		totals.add(processBlogs(ctx, db, tg, cfg.Scraper, result.blogs, result.group))
 	}
 
 	duration := time.Since(start).Truncate(time.Millisecond)
-	slog.InfoContext(ctx, "scrape completed",
-		slog.Duration("duration", duration),
-		slog.Int("posts_found", postsFound),
-		slog.Int("posts_sent", postsSent),
-		slog.Int("errors", scrapeErrors),
-	)
+	attrs := append([]slog.Attr{slog.Duration("duration", duration)}, totals.attrs()...)
+	slog.LogAttrs(ctx, slog.LevelInfo, "scrape completed", attrs...)
 	tg.LogText(ctx, fmt.Sprintf(
-		"completed\nduration: %s\nposts_found: %d\nposts_sent: %d\nerrors: %d",
-		duration, postsFound, postsSent, scrapeErrors,
+		"completed\nduration: %s\nposts_found: %d\nposts_sent: %d\nrecipients_accepted: %d\nrecipients_partial: %d\nrecipients_failed: %d\nempty_groups: %d\nerrors: %d",
+		duration,
+		totals.PostsFound,
+		totals.PostsSent,
+		totals.RecipientsAccepted,
+		totals.RecipientsPartial,
+		totals.RecipientsFailed,
+		totals.EmptyGroups,
+		totals.Errors,
 	))
 
 	return nil
-}
-
-func parseChatID(s string) int64 {
-	var n int64
-
-	_, _ = fmt.Sscanf(s, "%d", &n)
-
-	return n
 }
