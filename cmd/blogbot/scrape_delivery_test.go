@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 
@@ -103,19 +104,20 @@ func TestProcessBlogsDeliveryAccounting(t *testing.T) {
 		subscriberErr                                         error
 		want                                                  scrapeStats
 		wantResult                                            string
+		wantNotices                                           []string
 	}{
 		{name: "disabled", disabled: true, chats: []string{"42"}, want: scrapeStats{PostsFound: 1, DisabledSkips: 1}},
 		{name: "no subscribers", want: scrapeStats{PostsFound: 1, NoSubscriberSkips: 1}},
 		{name: "log only", logOnly: true, chats: []string{"42"}, want: scrapeStats{PostsFound: 1, LogOnlySkips: 1}},
 		{name: "already seen", alreadySeen: true, want: scrapeStats{AlreadySeen: 1}},
-		{name: "accepted", chats: []string{"42"}, images: true, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1}, wantResult: "accepted"},
-		{name: "text only accepted", chats: []string{"42"}, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1}, wantResult: "accepted"},
+		{name: "accepted", chats: []string{"42"}, images: true, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1}, wantResult: "accepted", wantNotices: []string{"sent #member 「post」 to 42"}},
+		{name: "text only accepted", chats: []string{"42"}, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1}, wantResult: "accepted", wantNotices: []string{"sent #member 「post」 to 42"}},
 		{name: "all parts fail", chats: []string{"42"}, images: true, failText: map[int64]bool{42: true}, failMedia: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, RecipientsFailed: 1, Errors: 2}, wantResult: "failed"},
 		{name: "text only fails", chats: []string{"42"}, failText: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, RecipientsFailed: 1, Errors: 1}, wantResult: "failed"},
 		{name: "text fails media accepted", chats: []string{"42"}, images: true, failText: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, RecipientsPartial: 1, Errors: 1}, wantResult: "partial"},
 		{name: "media fails text accepted", chats: []string{"42"}, images: true, failMedia: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, RecipientsPartial: 1, Errors: 1}, wantResult: "partial"},
 		{name: "missing download is partial", chats: []string{"42"}, images: true, missingImages: true, want: scrapeStats{PostsFound: 1, RecipientsPartial: 1, Errors: 1}, wantResult: "partial"},
-		{name: "mixed recipients", chats: []string{"42", "43"}, failText: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1, RecipientsFailed: 1, Errors: 1}},
+		{name: "mixed recipients", chats: []string{"42", "43"}, failText: map[int64]bool{42: true}, want: scrapeStats{PostsFound: 1, PostsSent: 1, RecipientsAccepted: 1, RecipientsFailed: 1, Errors: 1}, wantNotices: []string{"sent #member 「post」 to 43"}},
 		{name: "invalid ID", chats: []string{"garbage"}, want: scrapeStats{PostsFound: 1, RecipientsFailed: 1, Errors: 1}},
 		{name: "subscriber lookup fails", subscriberErr: errors.New("database offline"), want: scrapeStats{PostsFound: 1, Errors: 1}},
 	} {
@@ -160,10 +162,16 @@ func TestProcessBlogsDeliveryAccounting(t *testing.T) {
 				t.Fatal("skipped post attempted subscriber sends")
 			}
 
+			var notices []string
+
 			for _, text := range tg.logTexts {
 				if strings.HasPrefix(text, "sent #") {
-					t.Fatal("per-recipient detail leaked to Telegram log chat")
+					notices = append(notices, text)
 				}
+			}
+
+			if !slices.Equal(notices, tt.wantNotices) {
+				t.Errorf("successful-send notices = %q, want %q", notices, tt.wantNotices)
 			}
 
 			if !strings.Contains(logs.String(), `"msg":"group processing completed"`) {

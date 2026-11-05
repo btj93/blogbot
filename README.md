@@ -128,8 +128,10 @@ reliable identifiers.
   method, destination chat, accepted message IDs or failure/retry information.
   Blog sends also carry group, member ID, post URL and scrape run ID.
 - `notification attempt completed`: independent text/media outcome per recipient,
-  including partial results and incomplete image downloads. Per-recipient details
-  and retries are no longer sent to the Telegram log chat.
+  including partial results and incomplete image downloads. Complete subscriber
+  notifications also produce `sent #<member> 「<title>」 to <chat ID>` notices in
+  the Telegram log chat. Partial/failed attempts never produce a success notice;
+  detailed failures and retries remain in the server logs.
 
 `posts_sent` counts distinct new posts with at least one complete subscriber
 notification accepted by Telegram; disabled, log-only, unsubscribed, partial-only
@@ -150,14 +152,14 @@ Hinata posts are processed oldest-first by their official JST publication time;
 posts sharing a publication minute retain the site's oldest-first listing order.
 A missing or invalid publication time fails that Hinata scrape before any posts
 are claimed, rather than guessing their order. Publication times appear in post
-and delivery logs as `published_at`. Each post's delivery attempts finish before
-the next post starts, and downloaded photos retain their original URL order.
+and delivery logs as `published_at`. Within each run, each post's delivery attempts
+finish before the next post starts, and photos retain their original URL order.
 
-A PostgreSQL session advisory lock allows only one scrape per database at a time;
-overlapping scheduled runs log `scrape skipped` and exit without sending. An
-unprocessed post still present in the current feed is automatically eligible for
-normal delivery after recovery. Older posts outside the first-page feed are not
-backfilled. The existing claim/no-replay behavior for failed attempts is unchanged.
+Scheduled runs may overlap. Atomic per-URL claims prevent multiple runs from
+processing the same post, but do not guarantee oldest-first delivery across runs.
+An unprocessed post still present in the current feed is automatically eligible
+for normal delivery after recovery. Older posts outside the first-page feed are
+not backfilled. The existing claim/no-replay behavior for failed attempts is unchanged.
 
 ## Deploy to Oracle Cloud (Linux)
 

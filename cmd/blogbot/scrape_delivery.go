@@ -230,6 +230,8 @@ func processBlogs(
 			switch result {
 			case "accepted":
 				stats.RecipientsAccepted++
+
+				tg.LogText(postCtx, fmt.Sprintf("sent #%s 「%s」 to %s", blog.Name, blog.Title, chatID))
 			case "partial":
 				stats.RecipientsPartial++
 			case "failed":
