@@ -157,6 +157,8 @@ finish before the next post starts, and photos retain their original URL order.
 
 Scheduled runs may overlap. Atomic per-URL claims prevent multiple runs from
 processing the same post, but do not guarantee oldest-first delivery across runs.
+Only schema setup is serialized in a short database transaction to prevent
+concurrent startup DDL races; that lock is released before scraping or sending.
 An unprocessed post still present in the current feed is automatically eligible
 for normal delivery after recovery. Older posts outside the first-page feed are
 not backfilled. The existing claim/no-replay behavior for failed attempts is unchanged.

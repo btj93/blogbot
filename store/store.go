@@ -40,8 +40,24 @@ func (s *Store) DB() *sql.DB {
 }
 
 func (s *Store) migrate() error {
-	_, err := s.db.ExecContext(context.Background(), schema)
-	return err
+	ctx := context.Background()
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	// Concurrent startups otherwise race while replacing set_updated_at.
+	if _, err := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended('blogbot:migrate', 0))"); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, schema); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 const schema = `

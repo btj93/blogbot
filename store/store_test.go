@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"sync"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -123,6 +124,33 @@ func TestOpenAndMigrate(t *testing.T) {
 			t.Errorf("table[%d]=%q, want %q", i, tables[i], w)
 		}
 	}
+}
+
+func TestOpenConcurrentInitializers(t *testing.T) {
+	newTestStore(t)
+
+	start := make(chan struct{})
+
+	var workers sync.WaitGroup
+
+	for range 20 {
+		workers.Go(func() {
+			<-start
+
+			s, err := Open(testDSN)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			if err := s.Close(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+
+	close(start)
+	workers.Wait()
 }
 
 func TestMigrateIdempotent(t *testing.T) {
